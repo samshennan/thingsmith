@@ -1,0 +1,4 @@
+# runtime caches written by check_domains.py
+.rdap-bootstrap.json
+.whois-servers.json
+__pycache__/
