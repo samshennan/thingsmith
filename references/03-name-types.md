@@ -153,6 +153,38 @@ usable roots than free-association, and each layer has a different tone.
 The *machinery* layer is usually the most productive and the least claimed — everyone names
 after the treasure, almost nobody after the sieve.
 
+### The Forge pass — territories nobody in the category would reach
+
+Most naming projects fail to surprise because every territory came from the category's own
+vocabulary. Before converging, run `veles-forge`'s OPEN moves **at territory level** — on
+the *job the product does*, never on the product's name. Forge produces mechanisms; a
+mechanism is a territory.
+
+| Forge move | Run it on the product's job | Example output (a territory, not a name) |
+|---|---|---|
+| **Distant analogy** | State the function in one verb phrase, then ask how a distant field performs it | "finds the few worth chasing" → assaying, truffle hunting, talent scouting, sonar |
+| **Human truth** | What is the user embarrassed by, relieved by, proud of, the moment the product works? | "the relief of not missing it" → the lighthouse keeper, the safety net, the watchman |
+| **Inversion** | Name what it *removes* or prevents, not what it adds | the noise, the pile, the guesswork → sieve, silence, clearing |
+| **Collision** | Two unrelated domains whose overlap changes the feeling | navigation × kitchen → the recipe card, the pilot's checklist |
+| **Impossible first** | The most absurd honest name, then its plausible sibling | "the thing that reads every tender on earth" → the archivist, the polyglot |
+| **Emotion and theatre** | The ritual, reveal or character the product could become | the morning dispatch, the courier, the bell |
+
+Rules carried over from Forge, because they are what make it work:
+
+- **Seeds are person + mechanism + result,** not words. "A sommelier who smells the one
+  bottle worth opening" is a territory; "sommelier" is a word.
+- **No judging inside the pass.** Develop each seed before criticising it. The selection
+  happens at the territory table below, not during the pass.
+- **Ask Forge's closing question:** *what have we missed because our first territories felt
+  sensible?* Add one materially different territory from a fresh observation or constraint.
+- **Keep a bold option.** One Forge territory survives to the scorecard even if the safe
+  territories look stronger. This fills slot 4 (off-strategy) with something better than "the
+  opposite of house style". It may lose. It must lose *on the card*, not in the first meeting.
+
+When a Forge seed turns out to be a positioning idea rather than a naming territory — it
+changes what the product *is* — stop and say so. That is a brief problem (`01-brief.md`),
+and naming it now would bury it.
+
 ---
 
 ## Output of this stage

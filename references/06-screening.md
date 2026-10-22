@@ -37,11 +37,21 @@ name pronounced differently in each market is two brands wearing one spelling.
 Default language set: English, Polish, German, French, Spanish, Italian. Add any language
 spoken in a market the brief names, and any language with a large diaspora in those markets.
 
+**Run the machine reading first.** `scripts/say_it.py --readings-only` prints each
+language's cold reading as IPA (eSpeak NG applies that language's spelling rules) and flags
+`DIVERGENT` when two markets read the spelling as different words. It is a fast, honest
+first cut across all 40+ survivors; do the slang and false-friend columns yourself.
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/say_it.py" --names karbia zyla --langs en pl de --readings-only
+```
+
 **On the limits of doing this yourself:** professional houses use three native speakers
 *resident in the target country* per language — Catchword's standard, and the reason they
 catch things a dictionary does not. A model check is a screen, not a clearance. If the name
 is going to carry real money, say in the report that a native-speaker check is the next step
-and has not been done.
+and has not been done — and hand the principal `assets/native-speaker-check.md`, filled in
+with the shortlist, so the next step is a message they can send today.
 
 ---
 
@@ -93,8 +103,26 @@ what it was. Under 7 in 10 correct signals a retention problem.
 **The read-aloud test.** Have people read the name off a page. Multiple pronunciations means
 confusion, and confusion means they will search wrong and spell wrong.
 
+**The machine radio test** — run it on every survivor, before the humans. `say_it.py`
+speaks each name inside a carrier sentence ("The company is called ___", "Firma nazywa
+się ___") with a text-to-speech voice per language, then has Whisper transcribe it with no
+hint of the spelling. A `FAIL` prints the spelling it heard, which is the spelling customers
+will type into a search box.
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/say_it.py" --names karbia zyla --langs en pl
+#   karbia  radio en  FAIL  heard 'Carbia'   <- the K/C leak, every verbal handoff
+#   zyla    radio pl  FAIL  heard 'Żyła'     <- Polish for "vein": a trap-register kill
+```
+
+Synthetic voices are clearer than a phone line and Whisper is more attentive than a
+distracted listener, so read the result asymmetrically: **a machine FAIL is strong
+evidence; a machine PASS is weak evidence.** It never replaces the five-person tests on the
+shortlist.
+
 When there is no one to test on, say so in the output — "radio and spelling tests not run,
-five-person test recommended before purchase" — rather than quietly skipping them.
+five-person test recommended before purchase" — rather than quietly skipping them. A machine
+radio pass does not change that sentence.
 
 ---
 

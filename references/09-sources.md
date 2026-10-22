@@ -41,6 +41,25 @@ misleading briefs rather than large brainstorms; >$3M invested in sound-symbolis
 the letter findings (`v` alive, `b` reliable, `z` attention, `x` innovation); a linguist
 network across 76 countries; 5.5M+ live US trademarks across 45 classes.
 
+**Lexicon / Zune, the parallel-teams example** — `wtop.com/business-finance/2019/09/swiffer-blackberry-dasani-meet-the-man-who-named-your-favorite-products/`
+Source for: three teams on Microsoft's 2006 player, one on the real brief, one on a
+hypothetical Sony player, one for a different client; Placek declined to say which produced
+*Zune*. Lenny's podcast summary (above) describes the same "small, diversely briefed teams".
+Basis for the four-team method in `04-generation.md`.
+
+**Siegel+Gale — "Keeping names alive" (Jason Hall)** — `siegelgale.com/brand-building-creative-naming-lead-jason-hall-keeping-names-alive-final-presentation/`
+Source for: present names in real context (packaging, press release) because irrelevant
+associations fall away in context; ask "which names work and why", not "which do you like".
+Basis for `context_sheet.py` and the stage-7 rule.
+
+**Catchword — Name Visualizer** and "Now you see it: do you like it?" — `catchwordbranding.com/catchthis/now-you-see-it-do-you-like-it`
+Source for: showing candidates in six real-world marketing scenarios, business card to
+billboard.
+
+**Fabrik — brand naming presentation** — `fabrikbrands.com/branding-matters/brand-naming/how-to-create-a-brand-naming-presentation/`
+Source for: name in a large neutral font so logo styling does not drive the decision; say the
+name aloud. Basis for the single typeface in `context_sheet.py`.
+
 **Zinzin** — `zinzin.com/process/`
 Source for: the competitive namescape and search-engine namescape as distinct first steps;
 "naming the positioning, not the company"; the same four-category name taxonomy.
@@ -75,6 +94,18 @@ Source for the frequency-code mapping: higher-frequency sounds (front vowels, fr
 voiceless consonants) → higher evaluation, lower potency; lower-frequency sounds (back
 vowels, stops, voiced consonants) → lower evaluation, higher potency. The front/back vowel
 attribute table in `05-sound-symbolism.md` comes from this literature.
+
+---
+
+## Pronunciation tooling
+
+**eSpeak NG** — `github.com/espeak-ng/espeak-ng`. Rule-based text-to-phoneme for 100+
+languages; `--ipa` prints a language's reading of a spelling. Used for the cold-reading
+convergence check. It models spelling rules, not a native speaker's instinct, and is weak on
+loanwords and brand-like coinages that native readers often anglicise.
+
+**faster-whisper** — `github.com/SYSTRAN/faster-whisper`. CTranslate2 Whisper, CPU int8. Used
+with no initial prompt for the machine radio test, so the spelling is never leaked.
 
 ---
 

@@ -33,6 +33,42 @@ Target: **200–400 root words** before a single candidate is constructed.
 
 ---
 
+## Parallel teams with different briefs
+
+Lexicon does not brainstorm in one big room. It runs small teams, and not all of them get the
+real brief. For Microsoft's 2006 media player, Placek ran three teams: one briefed on the
+real project, one told it was naming a hypothetical Sony player, and one briefed as if for a
+different client. He has never said which team produced *Zune*. A team that does not know
+the client cannot defer to the client's taste, the house style, or the founder's favourite.
+
+Agents make this cheap. Run **four isolated generators in parallel** (sub-agents where the
+harness has them; otherwise sequential passes in fresh contexts that never see each other's
+output) and merge only at the end:
+
+| Team | Brief it receives | What it is for |
+|---|---|---|
+| **A — Straight** | The real brief, the namescape, all territories | The professional baseline |
+| **B — Decoy** | The same job, displaced: a different company, a different country, or a different category with the same emotional job (naming a *ferry* service when the product moves data) | Breaks category vocabulary |
+| **C — Forge** | Only the Forge territories from `03-name-types.md`, no competitor list | The bold option; keeps the off-strategy slot honest |
+| **D — Cold** | One line: what it does and for whom. No territories, no namescape, no constraints except form | The control. If D beats A, the brief or the territories are wrong |
+
+Rules:
+
+- **Isolation is the method.** Teams never see each other's lists until the merge. A team
+  that has read team A's list is just team A again.
+- **Each team owes its share of the volume** (≈40+ raw each, so the merged pool clears 150)
+  and records mechanic + source word for every candidate, as below.
+- **Decoy briefs are translated back at the merge.** A ferry name is judged as a name for
+  the real product; most will die, and the few that survive are usually the best surprises.
+- **Tag every candidate with its team** and keep the tag all the way to the report. If the
+  shortlist is all team A, say so — the decoy teams did not earn their cost on this project.
+- **Record which models actually ran.** "Four teams" run by one model in one context is one
+  team. If parallel agents were unavailable, write that in the report.
+
+The merge is the only place duplicates are removed. Do not ask the teams to filter.
+
+---
+
 ## The mechanics
 
 Organise candidates **by mechanic, not by theme**. Theme grouping hides the fact that half
@@ -121,7 +157,7 @@ These are cheap to satisfy while writing and expensive to retrofit.
 | Checkpoint | Count | If you are short |
 |---|---|---|
 | Root vocabulary | 200–400 | Go back to etymologies and adjacent fields |
-| Raw candidates | 150+ | Run the matrix on two more territories |
+| Raw candidates | 150+, from all four teams | Run the matrix on two more territories; check a team didn't quietly under-deliver |
 | Passing form screen | 40+ | The form constraints are being applied too early |
 | Scored | 8–15 | Loosen the screen, do not lower the scorecard |
 | Presented | 3–5 | — |

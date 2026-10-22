@@ -37,12 +37,12 @@ Load the reference for a stage when you reach it. Do not front-load them all.
 |---|---|---|---|
 | 0 | **Brief** | `references/01-brief.md` | The name's job is written down in one sentence |
 | 1 | **Namescape** | `references/02-namescape.md` | Every competitor plotted; the empty quadrant named |
-| 2 | **Territories** | `references/03-name-types.md` | 4+ territories, at least one off-strategy |
-| 3 | **Generate** | `references/04-generation.md`, `references/05-sound-symbolism.md` | 150+ raw, all four name types represented |
-| 4 | **Screen** | `references/06-screening.md` | Form, four-language, trap register, say-it test |
+| 2 | **Territories** | `references/03-name-types.md` | 4+ territories incl. a Forge pass; one bold option kept |
+| 3 | **Generate** | `references/04-generation.md`, `references/05-sound-symbolism.md` | 150+ raw from four isolated teams, all four name types |
+| 4 | **Screen** | `references/06-screening.md` | Form, machine readings + radio test, trap register, human tests |
 | 5 | **Score** | `references/07-scorecard.md` | 90-point card run; 8–15 survive |
 | 6 | **Verify** | `references/08-clearance.md` | Domains, handles, knockout, collision — all with evidence |
-| 7 | **Stage** | `assets/report-template.md` | A written document. Choose nothing. |
+| 7 | **Stage** | `assets/report-template.md`, `scripts/context_sheet.py` | Document + names-in-context sheet. Choose nothing. |
 
 `references/09-sources.md` holds the research this skill is built on, with the specific
 claim each source supports. Cite it when a client or principal asks "says who".
@@ -69,6 +69,12 @@ Real words are mostly gone — across ~250 RDAP lookups on one project, every ev
 word was registered and only 6 of ~38 short coined `.com` were free. That is an argument for
 weighting coinages, not for generating nothing else.
 
+#### Four teams, four briefs, no peeking (stages 2–3)
+One generator in one context is one point of view, however many names it writes. Run four
+isolated teams — straight, decoy brief, Forge territories, cold — and merge only at the end
+(`04-generation.md`). Lexicon has done this for decades with people; agents make it nearly
+free. Tag every candidate with its team. Record which models actually ran.
+
 #### The second market is a veto, never a tiebreak (stages 4, 6)
 A name pronounced differently in each market is two brands wearing one spelling. Divergent
 readings kill; they do not deduct points.
@@ -78,6 +84,13 @@ A 429, a timeout, a TLD with no RDAP service, a register you could not search �
 `UNVERIFIED` or `UNSUPPORTED`, printed as itself. "Probably free" is a banned phrase.
 `check_domains.py` exits non-zero when anything is unresolved, precisely so a partial sweep
 cannot be handed over as a clean one.
+
+#### Never present a name on a blank page (stage 7)
+A bare word on white invites objections that disappear once the name sits in a homepage, an
+inbox, a headline, a sentence said aloud. Render every finalist — and two or three
+competitors, for scale — into the same scenes with `context_sheet.py`, in one neutral
+typeface so the font cannot choose the name. Ask the principal which names *work* and why,
+not which they like.
 
 #### Choose nothing (stage 7)
 Naming is the principal's decision. Stage it with the evidence under it. The most re-read
@@ -122,6 +135,25 @@ Automated: GitHub · npm · PyPI · crates · Docker Hub · Hugging Face · YouT
 Bluesky · GitLab · Reddit. Manual, and named as manual in the report: X · Instagram ·
 LinkedIn company slug · Product Hunt · TikTok · app-store developer name.
 
+**Pronunciation.** Machine stand-ins for the four-language and radio tests. `--readings-only`
+needs only eSpeak NG; the radio test also needs `pip install faster-whisper` (the model
+downloads once) and a TTS voice per language (Windows SAPI voices are used when present,
+eSpeak NG otherwise). Anything that cannot run prints `UNSUPPORTED` and exits non-zero.
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/say_it.py" --names karbia zyla --langs en pl de --readings-only
+python "${CLAUDE_SKILL_DIR}/scripts/say_it.py" --names karbia zyla --langs en pl
+```
+
+A machine FAIL is strong evidence; a machine PASS is weak evidence. Native speakers are still
+the clearance: send `assets/native-speaker-check.md`.
+
+**Context sheet.** One self-contained HTML page, every finalist in nine identical scenes.
+
+```bash
+python "${CLAUDE_SKILL_DIR}/scripts/context_sheet.py" --names karbia ritka namira   --descriptor "tender discovery for XR studios" --competitors Mimira --shuffle
+```
+
 **Trademark knockout and collision search.** See `references/08-clearance.md` for the
 register list, the Nice classes, and the sentence that must appear in every output about
 what a knockout does not cover.
@@ -130,15 +162,18 @@ what a knockout does not cover.
 
 ### Composes with
 
-- **`veles-forge`** — when the naming problem is really a positioning problem, forge the
-  concept first; namesmith names what survives.
-- **`premortem`** — run it on the leading candidate before purchase: "it is eighteen months
-  from now and the name was a mistake — why?"
+- **`veles-forge`** — run inside stage 2 (`03-name-types.md`, "The Forge pass") to find
+  territories outside the category's vocabulary, and as team C in stage 3. If Forge shows the
+  naming problem is really a positioning problem, stop and forge the concept first.
 - **`polonize`** — for any Polish-market reading or register question.
-- **`second-opinion`** — hand the shortlist to a model with no context; a name that needs the
-  derivation explained to land is a name with a problem.
 - **`brand-guardian`** / **`veles-brand`** — once a name is chosen, for the wordmark and
   identity work.
+- **Premortem, built in** — before anything is bought, write one paragraph on the leading
+  candidate: "it is eighteen months from now and the name was a mistake — why?" Put it in the
+  report next to the candidate.
+- **Cold reader, built in** — hand the shortlist to a fresh agent or model with no context and
+  ask what each name is and does. A name that needs its derivation explained to land is a
+  name with a problem. Team D in stage 3 is the same idea, earlier.
 
 ### Hard rules
 
@@ -148,4 +183,6 @@ what a knockout does not cover.
   "available" or "clear".
 - Never present a name without its collision status and its scorecard row.
 - Never call a knockout search legal clearance.
+- Never present a finalist without its context sheet, or without competitors beside it.
+- Never call a machine pronunciation pass a native-speaker check.
 - Never choose. Stage the decision with the evidence under it.

@@ -55,7 +55,7 @@ that read corporate and interchangeable.">
 | Stage | Count | Notes |
 |---|---|---|
 | Root vocabulary | | |
-| Raw candidates | | |
+| Raw candidates | | Team A / B (decoy) / C (Forge) / D (cold): <n each>. Models that ran: <list> |
 | Passed form screen | | |
 | Passed four-language + trap register | | |
 | Scored | | |
@@ -67,9 +67,9 @@ that read corporate and interchangeable.">
 
 ## 4. Candidates
 
-| Name | Type | Mechanic | Source word | EN reading | PL reading | <L3> | Match? |
-|---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| Name | Team | Type | Mechanic | Source word | EN reading | PL reading | <L3> | Match? | Radio (machine) |
+|---|---|---|---|---|---|---|---|---|---|
+| | A/B/C/D | | | | | | | | PASS / FAIL heard '…' |
 
 ---
 
@@ -79,7 +79,7 @@ that read corporate and interchangeable.">
 
 | Name | Killed by | Reason |
 |---|---|---|
-| | four-language / trap register / trademark / collision / domain / scorecard | |
+| | four-language / machine radio / trap register / native speaker / trademark / collision / domain / scorecard | |
 
 ---
 
@@ -126,16 +126,22 @@ UNRESOLVED <anything not settled — mandatory line, even if empty>
 - **Story:** <the derivation, in one sentence the principal can repeat>
 - **Why it wins:** <2–3 bullets tied to the brief, not to taste>
 - **What you give up:** <the honest cost — spelling, a taken handle, a price>
+- **Premortem:** <eighteen months on, the name was a mistake. The most likely reason why>
+- **Descriptor:** <the plain line that sits under the name, as on the context sheet>
 - **Score:** <n>/100 · **Reach:** <n>/10 · **Trademark:** <10/5/0>
 
 *(repeat 3–5 times)*
+
+**In context:** `<context-sheet.html>` — every finalist and <n> competitors in the same nine
+scenes. Look at it before reading the scores.
 
 ---
 
 ## 9. What has not been done
 
-- [ ] Native-speaker linguistic check (3 resident speakers per language)
-- [ ] Radio / spelling-back / recall tests with 5+ people
+- [ ] Native-speaker linguistic check (3 resident speakers per language) — form ready: `assets/native-speaker-check.md`
+- [ ] Radio / spelling-back / recall tests with 5+ people (the machine radio test does not tick this box)
+- [ ] Live-with-it week: the principal uses the top two in real sentences for a week before deciding
 - [ ] Full trademark clearance by an attorney
 - [ ] <anything else>
 
