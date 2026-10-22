@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+scripts/.rdap-bootstrap.json
+scripts/.whois-servers.json
+/domains.json
+/handles.json
+/say-it.json
+/shortlist.html
+/context-sheet.html
+.DS_Store
+Thumbs.db
