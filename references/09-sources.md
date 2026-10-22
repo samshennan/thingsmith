@@ -1,5 +1,7 @@
 # Sources
 
+Implementation note (22 October 2026): agency methods below are credited background reading, not endorsement or measured guarantees. Thingsmith adapts the creative comparison to eight dimensions /80 and keeps verification evidence separate. Historical statistics and vendor characterisations below are not current availability evidence.
+
 What this skill is built on, and which claim each source supports. Cite this when a
 principal or client asks "says who". Researched 2026-08-22.
 

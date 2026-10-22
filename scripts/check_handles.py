@@ -1,31 +1,16 @@
 #!/usr/bin/env python3
-"""Handle availability checker for the thingsmith skill.
+"""Public handle and package-record observations for Thingsmith.
 
-Three rules this script exists to enforce.
-
-1. A domain alone is not a name. A candidate whose GitHub org, npm package
-   and YouTube handle are all held by strangers is a candidate with a
-   permanent search problem, whatever its .com says.
-
-2. Every platform is read by its own positive signal. "The request didn't
-   fail" is not "free". Each probe below names the exact response that means
-   TAKEN and the exact response that means FREE; anything else -- a 403, a
-   429, a consent redirect, a page shape we do not recognise -- is UNVERIFIED.
-
-3. Platforms that cannot be checked without logging in, or whose terms forbid
-   scripted lookups, are listed as MANUAL and printed as MANUAL. They are
-   never silently skipped and never reported as clear. The process exits
-   non-zero while anything is UNVERIFIED, so a partial sweep cannot be handed
-   over as a clean one.
-
-Usage:
-    python check_handles.py --names ritka karbia
-    python check_handles.py --names ritka --json handles.json
-    python check_handles.py --names ritka --only github npm pypi
-    python check_handles.py --list
+Each platform has its own probe. NO_RECORD_FOUND is a negative lookup, never
+permission or confirmation to claim a name. Hidden accounts, login walls,
+invalid names and unknown responses remain explicit. Exit 0 means requested
+automated checks completed; printed manual work remains open. --only selects
+platforms; --list shows automated and manual coverage. --json exports evidence.
 """
 
 import argparse
+from datetime import datetime, timezone
+import hashlib
 import json
 import re
 import ssl
@@ -47,7 +32,16 @@ try:
 except ImportError:
     SSL_CTX = ssl.create_default_context()
 
-TAKEN, FREE, UNVERIFIED, INVALID = "taken", "FREE", "UNVERIFIED", "INVALID"
+TAKEN, NO_RECORD, UNVERIFIED, INVALID = "taken", "NO_RECORD_FOUND", "UNVERIFIED", "INVALID"
+TRACE = threading.local()
+
+
+def record_response(status, url, final_url, body):
+    if hasattr(TRACE, "requests"):
+        TRACE.requests.append({"url": url, "final_url": final_url, "http_status": status,
+                               "checked_at": datetime.now(timezone.utc).isoformat(),
+                               "body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest()})
+    return status, final_url, body
 
 
 def fetch(url, timeout=20, accept="application/json"):
@@ -55,22 +49,22 @@ def fetch(url, timeout=20, accept="application/json"):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": accept})
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=SSL_CTX) as r:
-            return r.status, r.geturl(), r.read(400_000).decode("utf-8", "replace")
+            return record_response(r.status, url, r.geturl(), r.read(400_000).decode("utf-8", "replace"))
     except urllib.error.HTTPError as e:
         try:
             body = e.read(50_000).decode("utf-8", "replace")
         except Exception:
             body = ""
-        return e.code, url, body
+        return record_response(e.code, url, e.geturl(), body)
     except Exception as e:  # timeout, DNS, TLS
-        return None, url, f"{type(e).__name__}: {e}"
+        return record_response(None, url, url, f"{type(e).__name__}: {e}")
 
 
 def by_status(status, taken=(200,), free=(404,)):
     if status in taken:
         return TAKEN, ""
     if status in free:
-        return FREE, ""
+        return NO_RECORD, ""
     return UNVERIFIED, f"HTTP {status}" if status else "no response"
 
 
@@ -88,8 +82,8 @@ def p_github(n):
 def p_npm(n):
     s, _, _ = fetch(f"https://registry.npmjs.org/{n.lower()}")
     st, note = by_status(s)
-    if st == FREE:
-        note = "npm also blocks names too similar to existing ones; FREE here is not a publish guarantee"
+    if st == NO_RECORD:
+        note = "npm also blocks names too similar to existing ones; NO_RECORD here is not a publish guarantee"
     return st, note
 
 
@@ -97,7 +91,7 @@ def p_pypi(n):
     norm = re.sub(r"[-_.]+", "-", n).lower()  # PEP 503
     s, _, _ = fetch(f"https://pypi.org/pypi/{norm}/json")
     st, note = by_status(s)
-    if st == FREE:
+    if st == NO_RECORD:
         note = "PyPI may still refuse names that collide after normalisation or are prohibited"
     return st, note
 
@@ -119,7 +113,7 @@ def p_dockerhub(n):
     if s2 == 200:
         return TAKEN, "organisation"
     if s2 == 404:
-        return FREE, ""
+        return NO_RECORD, ""
     return UNVERIFIED, f"user 404, org lookup HTTP {s2}"
 
 
@@ -131,7 +125,7 @@ def p_huggingface(n):
     if s2 == 200:
         return TAKEN, "organisation"
     if s in (404,) and s2 in (404,):
-        return FREE, ""
+        return NO_RECORD, ""
     return UNVERIFIED, f"user HTTP {s}, org HTTP {s2}"
 
 
@@ -140,9 +134,11 @@ def p_youtube(n):
     if "consent." in (final or ""):
         return UNVERIFIED, "redirected to cookie consent (EU); check manually"
     if s == 200:
-        return TAKEN, ""
+        if re.search(r'"(?:channelId|externalId)"\s*:\s*"UC[A-Za-z0-9_-]+"', body):
+            return TAKEN, "public channel metadata found"
+        return UNVERIFIED, "HTTP 200 without recognised channel metadata"
     if s == 404:
-        return FREE, ""
+        return NO_RECORD, ""
     return by_status(s)
 
 
@@ -157,7 +153,7 @@ def p_telegram(n):
     if 'class="tgme_page_title"' in body:
         return TAKEN, ""
     if "tgme_page" in body:
-        return FREE, "no public profile; a private account could still hold it"
+        return UNVERIFIED, "no public profile; a private or reserved account could still hold it"
     return UNVERIFIED, "unrecognised page shape"
 
 
@@ -165,10 +161,14 @@ def p_bluesky(n):
     handle = f"{n.lower()}.bsky.social"
     q = urllib.parse.urlencode({"handle": handle})
     s, _, body = fetch(f"https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?{q}")
-    if s == 200:
+    try:
+        doc = json.loads(body)
+    except ValueError:
+        return UNVERIFIED, "unparseable handle response"
+    if s == 200 and isinstance(doc, dict) and str(doc.get("did", "")).startswith("did:"):
         return TAKEN, handle
-    if s == 400 and "resolve handle" in body.lower():
-        return FREE, handle
+    if s == 400:
+        return UNVERIFIED, f"handle did not resolve; claiming {handle} is unconfirmed"
     return UNVERIFIED, f"HTTP {s}"
 
 
@@ -177,7 +177,10 @@ def p_gitlab(n):
     if s != 200:
         return by_status(s)
     try:
-        if json.loads(body):
+        users = json.loads(body)
+        if not isinstance(users, list):
+            return UNVERIFIED, "unexpected user response shape"
+        if any(isinstance(u, dict) and str(u.get("username", "")).lower() == n.lower() for u in users):
             return TAKEN, "user"
     except ValueError:
         return UNVERIFIED, "unparseable user response"
@@ -185,7 +188,7 @@ def p_gitlab(n):
     if s2 == 200:
         return TAKEN, "group"
     if s2 == 404:
-        return FREE, "no user or public group; a private group could still hold it"
+        return UNVERIFIED, "no user or public group; a private group could still hold it"
     return UNVERIFIED, f"group lookup HTTP {s2}"
 
 
@@ -202,7 +205,7 @@ def p_subreddit(n):
     if s == 200 and '"kind": "t5"' in body.replace('":"', '": "'):
         return TAKEN, ""
     if s == 404 or (s == 200 and "search" in (final or "")):
-        return FREE, ""
+        return NO_RECORD, ""
     st, note = by_status(s)
     if s in (403, 429):
         note = "Reddit blocks unauthenticated scripts often; check manually"
@@ -245,6 +248,8 @@ def main():
     ap.add_argument("--sleep", type=float, default=1.0, help="pause between calls to one platform")
     ap.add_argument("--list", action="store_true", help="show automated vs manual platforms")
     a = ap.parse_args()
+    if a.sleep < 0:
+        ap.error("--sleep must be non-negative")
 
     if a.list:
         print("AUTOMATED")
@@ -256,6 +261,9 @@ def main():
         return 0
     if not a.names:
         ap.error("--names is required (or use --list)")
+    if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,99}", n) for n in a.names):
+        ap.error("--names must be bare ASCII handles, without @, spaces, URLs or path characters")
+    a.names = list(dict.fromkeys(a.names))
 
     platforms = a.only or list(PROBES)
     results = {n: {} for n in a.names}
@@ -266,12 +274,16 @@ def main():
         for i, n in enumerate(a.names):
             if i:
                 time.sleep(a.sleep)
+            TRACE.requests = []
             try:
                 st, note = fn(n)
-            except Exception as e:  # a probe bug must not read as FREE
+            except Exception as e:  # a probe bug must not read as NO_RECORD
                 st, note = UNVERIFIED, f"probe error: {type(e).__name__}: {e}"
             with lock:
-                results[n][platform] = {"status": st, "note": note}
+                results[n][platform] = {"status": st, "note": note,
+                                        "query": n, "requests": TRACE.requests,
+                                        "checked_at": datetime.now(timezone.utc).isoformat(),
+                                        "parser_version": 2, "claimability": "UNCONFIRMED"}
 
     # One thread per platform: parallel across hosts, polite within each.
     threads = [threading.Thread(target=worker, args=(p,)) for p in platforms]
@@ -283,24 +295,27 @@ def main():
     unresolved = 0
     for n in a.names:
         row = results[n]
-        free = sum(1 for p in platforms if row[p]["status"] == FREE)
-        print(f"\n{n}   {free}/{len(platforms)} automated handles free")
+        free = sum(1 for p in platforms if row[p]["status"] == NO_RECORD)
+        print(f"\n{n}   {free}/{len(platforms)} automated lookups found no record")
         for p in platforms:
             r = row[p]
-            if r["status"] == UNVERIFIED:
+            if r["status"] in (UNVERIFIED, INVALID):
                 unresolved += 1
             note = f"  ({r['note']})" if r["note"] else ""
             print(f"  {PROBES[p][0]:<24} {r['status']}{note}")
         for k, v in MANUAL.items():
             print(f"  {k:<24} MANUAL  {v.replace('<name>', n)}")
         row["_manual"] = {k: v.replace("<name>", n) for k, v in MANUAL.items()}
+        row["_summary"] = {"automated_complete": all(row[p]["status"] not in (UNVERIFIED, INVALID) for p in platforms),
+                           "manual_complete": False, "claimability": "UNCONFIRMED"}
 
     if a.json:
         with open(a.json, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2)
 
+    print("\nNo-record observations do not confirm claimability. Manual checks remain open.")
     if unresolved:
-        print(f"\n{unresolved} check(s) UNVERIFIED -- this sweep is not complete.", file=sys.stderr)
+        print(f"\n{unresolved} check(s) unresolved or invalid -- automated sweep incomplete.", file=sys.stderr)
         return 1
     return 0
 

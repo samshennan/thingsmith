@@ -1,155 +1,47 @@
-# Naming report — <THING>
+# Naming report — <thing>
 
-> **BLUF**
-> **What:** <N> candidate names for <thing>, screened, scored and verified.
-> **Why:** <the name's job, one sentence from the brief>.
-> **What you do:** read the top <3–5>, pick one or ask for another round in <territory>.
-> Nothing has been bought. Nothing has been decided.
+**Shortlist:** <3–5 names, or actual count and why>
 
-**Date:** YYYY-MM-DD · **Markets:** <home> now, <second> later · **Prepared by:** thingsmith
+**Name's job:** <one sentence>
 
----
+**Next action:** <specific action, owner and timing>
 
-## 0. The brief
+Date: <UTC date/time> · Markets/languages: <explicit list> · Mode: <name/check/compare>
 
-```
-Naming:            <the thing>
-Name's job:        <one sentence>
-Markets:           <home> now, <second> later
-Hard constraints:  <TLD requirement / house style / architecture>
-Assumed (unconfirmed): <anything the principal has not signed off>
-```
+## Brief and work performed
 
----
+Audience: <who>. Constraints: <hard requirements versus preferences>. Acquisition/renewal budget: <amount or unknown>. Assumptions: <unconfirmed items>.
 
-## 1. The namescape
+Scope: <compact/full/custom>. Actual models and isolation: <what ran>. Competitor sources: <links/dates>. Territories: <directions and rationale>. Funnel: <raw, distinct after deduplication, KEEP/REVIEW/REJECT, investigated, presented>. Explain shortfalls without weakening requirements.
 
-|  | Real word | Compound | Coined |
-|---|---|---|---|
-| **Functional** | | | |
-| **Experiential** | | | |
-| **Evocative** | | | |
-| **Abstract** | | | |
+## Finalists
 
-**The crowded cell:** <where competitors pile up>
-**The empty cell:** <the opportunity>
-**Metaphors already claimed in-market:** <metaphor — who holds it>
+For each: spelling/display and URL form, ID, territory, type, actual generator, verified source root or invented association, why it fits, practical compromise, plausible failure mode and descriptor. Creative total: <n>/80, with dimension scores and reasons. Unknown evidence is not a numerical score.
 
-One sentence on the field's tone: <e.g. "Fourteen of sixteen names are functional compounds
-that read corporate and interchangeable.">
+Context sheet: <relative HTML link>, same styling for every candidate and relevant competitors.
 
----
+## Evidence matrix
 
-## 2. Territories explored
+| Candidate | Namespace/query | Observation | Endpoint/source | Checked at UTC | Interpretation | Open step |
+|---|---|---|---|---|---|---|
+| <ID> | <domain/handle/language/database> | <actual result> | <URL or endpoint> | <time> | <what this proves> | <provider/human/professional check> |
 
-| Territory | What it is | Quadrant it aims at | Why it works in both markets |
-|---|---|---|---|
-| | | | |
+NO_RECORD_FOUND isn't claimability. Separate costs into known initial, known renewal, acquisition quote and unknown. State the language/voice/model used for each synthetic test. Record trademark search scope; no-hit isn't legal clearance.
 
-**Dropped, and why:** <territory — reason>
+## Rejection and review log
 
----
+| ID/name | KEEP/REVIEW/REJECT | Specific reason | Evidence | Confirmed or provisional |
+|---|---|---|---|---|
+| <name> | <state> | <reason> | <source/test> | <state> |
 
-## 3. The funnel
+## What remains open
 
-| Stage | Count | Notes |
-|---|---|---|
-| Root vocabulary | | |
-| Raw candidates | | Team A / B (decoy) / C (Forge) / D (cold): <n each>. Models that ran: <list> |
-| Passed form screen | | |
-| Passed four-language + trap register | | |
-| Scored | | |
-| Presented | | |
+- Native-speaker feedback: <languages, respondents and tasks still needed>.
+- Human spelling-back/recall: <actual sample and results, or not run>.
+- Registrar/platform confirmation and current costs: <items>.
+- Appropriate professional trademark clearance: <scope>.
+- Other unresolved or unsupported automated/manual checks: <items, or none>.
 
-*If any stage ran short of the minimums in the skill, say so here.*
+## Decision
 
----
-
-## 4. Candidates
-
-| Name | Team | Type | Mechanic | Source word | EN reading | PL reading | <L3> | Match? | Radio (machine) |
-|---|---|---|---|---|---|---|---|---|---|
-| | A/B/C/D | | | | | | | | PASS / FAIL heard '…' |
-
----
-
-## 5. KILLED
-
-*The most re-read section. One specific reason each — never "didn't feel right".*
-
-| Name | Killed by | Reason |
-|---|---|---|
-| | four-language / machine radio / trap register / native speaker / trademark / collision / domain / scorecard | |
-
----
-
-## 6. Scorecard
-
-Scored out of 10 per dimension, 100 max. Competitor names included for scale.
-
-| Name | Pos | Dist | Depth | Enrg | Human | Sound | Appr | "33" | TM | Reach | **Total** |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| | | | | | | | | | | | |
-| *<competitor>* | | | | | | | | | | | |
-
-**Shape notes:** <what the pattern says — not just the totals>
-
----
-
-## 7. Verification
-
-*Every line below is evidence-backed. `UNVERIFIED` and `UNSUPPORTED` appear as themselves.*
-
-### <NAME 1>
-
-```
-domains    .com <status (source)> | .<home> <status> | .ai <status> | .io <status>
-handles    free: ... | taken: ... | BLOCKED: ...
-trademark  TMview <n> hits cl.<x>/<y> (date) | <national register> <n> hits | <second market> <n> hits
-collision  <n> searches by <routes>. <finding>. NOT a clearance.
-sound      <one line: what the phonetics project, and whether that fits the positioning>
-bundle     first year ~<X>, renewal ~<Y>  (<breakdown>)
-UNRESOLVED <anything not settled — mandatory line, even if empty>
-```
-
-*(repeat per shortlisted name)*
-
-> **This is a knockout screen, not legal clearance.** It does not cover similar-sounding or
-> visually similar marks, unregistered common-law rights, or state and regional registers. A
-> trademark attorney must clear the final candidate before launch.
-
----
-
-## 8. Ranked shortlist
-
-### 1. <NAME> — <one-line pitch>
-- **Story:** <the derivation, in one sentence the principal can repeat>
-- **Why it wins:** <2–3 bullets tied to the brief, not to taste>
-- **What you give up:** <the honest cost — spelling, a taken handle, a price>
-- **Premortem:** <eighteen months on, the name was a mistake. The most likely reason why>
-- **Descriptor:** <the plain line that sits under the name, as on the context sheet>
-- **Score:** <n>/100 · **Reach:** <n>/10 · **Trademark:** <10/5/0>
-
-*(repeat 3–5 times)*
-
-**In context:** `<context-sheet.html>` — every finalist and <n> competitors in the same nine
-scenes. Look at it before reading the scores.
-
----
-
-## 9. What has not been done
-
-- [ ] Native-speaker linguistic check (3 resident speakers per language) — form ready: `assets/native-speaker-check.md`
-- [ ] Radio / spelling-back / recall tests with 5+ people (the machine radio test does not tick this box)
-- [ ] Live-with-it week: the principal uses the top two in real sentences for a week before deciding
-- [ ] Full trademark clearance by an attorney
-- [ ] <anything else>
-
----
-
-## 10. The decision
-
-**Nothing has been chosen.** The recommendation is the *evidence*, not the pick.
-
-Next physical action if you choose <NAME>: <register X, brief the attorney, contact the
-domain holder> — and the cost of doing it.
+Recommendation if requested: <best fit, reasons and compromises>. User decision: <pending or actual decision>. Nothing purchased, claimed, sent or filed unless separately instructed. Next physical action: <owner, action, when>.
