@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Handle availability checker for the namesmith skill.
+"""Handle availability checker for the thingsmith skill.
 
 Three rules this script exists to enforce.
 
@@ -36,7 +36,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-UA = "namesmith-handle-check/1.0 (+https://github.com/; availability research)"
+UA = "thingsmith-handle-check/1.0 (+https://github.com/; availability research)"
 
 # Older Python/OpenSSL builds ship a CA store that predates newer Let's
 # Encrypt chains (Docker Hub fails verification on OpenSSL 1.1.1n while the

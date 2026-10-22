@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Domain availability checker for the namesmith skill.
+"""Domain availability checker for the thingsmith skill.
 
 Four rules this script exists to enforce.
 
@@ -103,7 +103,7 @@ WEAK_REGISTERED = [
 ]
 
 _ctx = ssl.create_default_context()
-_UA = {"User-Agent": "namesmith/2.0", "Accept": "application/rdap+json"}
+_UA = {"User-Agent": "thingsmith/2.0", "Accept": "application/rdap+json"}
 
 
 # --------------------------------------------------------------------------

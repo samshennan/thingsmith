@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""In-context presentation sheet for the namesmith skill.
+"""In-context presentation sheet for the thingsmith skill.
 
 Agencies never present a name as a word on a white slide. Siegel+Gale's rule
 is to show it where it will live -- on the packaging, inside a press release

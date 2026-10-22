@@ -1,8 +1,8 @@
-# Skill: namesmith
+# Skill: thingsmith
 
-**When to use:** Name a public-facing product, brand or company for an international market and clear it: brief, namescape, four territories, generation, four-language trap screen, 90-point scorecard, then real RDAP/WHOIS domain, handle, trademark and collision checks. Triggers: 'name this', 'what should we call it', 'is that name available', 'check this domain', /namesmith.
+**When to use:** Name a public-facing product, brand or company for an international market and clear it: brief, namescape, four territories, generation, four-language trap screen, 90-point scorecard, then real RDAP/WHOIS domain, handle, trademark and collision checks. Triggers: 'name this', 'what should we call it', 'is that name available', 'check this domain', /thingsmith.
 
-## Namesmith
+## Thingsmith
 
 Naming fails in three ways, and none of them is running out of ideas.
 

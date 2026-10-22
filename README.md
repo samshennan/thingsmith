@@ -1,4 +1,4 @@
-# namesmith
+# Thingsmith
 
 **A naming agency's method, packaged as an agent skill.** Give it what you are naming and
 who it is for. It runs the process professional naming houses use: brief, competitor map,
@@ -6,9 +6,9 @@ territories, four competing generation teams, trap screening, a scorecard, and t
 availability checks built never to report something as free unless they have proof. It
 stages the decision with the evidence underneath. It never chooses for you.
 
-> Working name. `namesmith` collides with an existing AI name generator at namesmith.app,
-> so the skill's own rules kill it as a public brand. It gets a new name before any public
-> release.
+> Working name. `thingsmith` passed the skill's own checks (domains, handles, radio test),
+> but the trademark knockout and native-speaker checks are still open. Formerly `namesmith`,
+> which collides with a live AI name generator at namesmith.app.
 
 Built for Claude Code. `AGENTS.md` (Codex) and `GEMINI.md` (Gemini CLI) carry the same
 skill for those agents.
@@ -37,17 +37,17 @@ skill for those agents.
 
 ```bash
 # macOS / Linux
-git clone https://github.com/samshennan/namesmith.git ~/.claude/skills/namesmith
+git clone https://github.com/samshennan/thingsmith.git ~/.claude/skills/thingsmith
 ```
 
 ```powershell
 # Windows (PowerShell)
-git clone https://github.com/samshennan/namesmith.git "$HOME\.claude\skills\namesmith"
+git clone https://github.com/samshennan/thingsmith.git "$HOME\.claude\skills\thingsmith"
 ```
 
 If you keep the clone somewhere else, link it instead of copying it, so updates reach the
 skill:
-- macOS / Linux: `ln -s <clone> ~/.claude/skills/namesmith`
+- macOS / Linux: `ln -s <clone> ~/.claude/skills/thingsmith`
 - Windows: `New-Item -ItemType Junction`
 
 **Codex / Gemini CLI.** Point the agent at `AGENTS.md` or `GEMINI.md` in the clone. The
@@ -89,7 +89,7 @@ python scripts/say_it.py --names karbia --langs en
 Start it in Claude Code with:
 
 ```
-/namesmith a tender-discovery tool for XR studios, selling in the UK and Poland
+/thingsmith a tender-discovery tool for XR studios, selling in the UK and Poland
 ```
 
 You can also just say "help me name this" or "is this name available?". The skill
@@ -228,6 +228,6 @@ Without them, the skill runs the Forge moves itself and skips the rest.
 ## Maintenance
 
 - After editing `SKILL.md`, regenerate `AGENTS.md` and `GEMINI.md` (`python _SHARED/scripts/skill-adapt.py
-  skills/namesmith` in the source workspace), or they drift out of sync.
+  skills/thingsmith` in the source workspace), or they drift out of sync.
 - Don't commit `scripts/.rdap-bootstrap.json` or `scripts/.whois-servers.json`. They are
   per-machine caches, and they're gitignored.

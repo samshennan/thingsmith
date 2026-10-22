@@ -6,7 +6,7 @@
 > **What you do:** read the top <3–5>, pick one or ask for another round in <territory>.
 > Nothing has been bought. Nothing has been decided.
 
-**Date:** YYYY-MM-DD · **Markets:** <home> now, <second> later · **Prepared by:** namesmith
+**Date:** YYYY-MM-DD · **Markets:** <home> now, <second> later · **Prepared by:** thingsmith
 
 ---
 

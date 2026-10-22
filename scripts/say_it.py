@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pronunciation screen for the namesmith skill: readings + an automated radio test.
+"""Pronunciation screen for the thingsmith skill: readings + an automated radio test.
 
 Two tests, both machine stand-ins for human tests in references/06-screening.md.
 Neither replaces three native speakers resident in-country. Both are cheap
@@ -40,6 +40,7 @@ import argparse
 import difflib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -84,9 +85,31 @@ def ipa(espeak, name, lang):
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
 
 
+# Each language's eSpeak voice writes the same sound with its own allophones
+# (English /əʊ/, Polish /ɔ/, German /oː/ are all "o" to a listener). Compare
+# broad sound classes, not narrow IPA, or every pair of languages diverges.
+# Diphthongs become single symbols first so "kai-" never matches "ki-".
+DIPHTHONGS = [("aɪ", "Y"), ("aj", "Y"), ("eɪ", "E"), ("ej", "E"), ("əʊ", "o"),
+              ("oʊ", "o"), ("aʊ", "W"), ("ɔɪ", "O"), ("ɔj", "O"), ("oj", "O")]
+BROAD = str.maketrans({"ɐ": "a", "ɑ": "a", "æ": "a", "ʌ": "a", "ə": "a", "ɜ": "e",
+                       "ɛ": "e", "ɪ": "i", "ɨ": "i", "ɔ": "o", "ɒ": "o", "ʊ": "u",
+                       "ɹ": "r", "ɾ": "r", "ʁ": "r", "β": "v", "ɡ": "g", "ʃ": "S",
+                       "ʂ": "S", "ɕ": "S", "ʒ": "Z", "ʐ": "Z", "ʑ": "Z", "ŋ": "n",
+                       "ɲ": "n", "ɫ": "l", "θ": "t", "ð": "d", "ʲ": None, "ʰ": None})
+VOWELS = set("aeiouyYEWO")
+
+
 def ipa_core(s):
     # Stress, length and syllable marks change emphasis, not identity.
-    return "".join(c for c in s if c not in "ˈˌːˑ.‿ -_()" and not c.isspace())
+    s = "".join(c for c in s if c not in "ˈˌːˑ.‿ -_()" and not c.isspace())
+    for a, b in DIPHTHONGS:
+        s = s.replace(a, b)
+    s = s.translate(BROAD)
+    return re.sub(r"(.)\1+", r"\1", s)  # doubled letters are one sound
+
+
+def first_vowel(core):
+    return next((c for c in core if c in VOWELS), "")
 
 
 def readings(espeak, name, langs):
@@ -97,6 +120,10 @@ def readings(espeak, name, langs):
     for i, a in enumerate(ls):
         for b in ls[i + 1:]:
             r = difflib.SequenceMatcher(None, cores[a], cores[b]).ratio()
+            # The first vowel carries the name's identity: "KAI-peto" and
+            # "ki-PE-to" are different words whatever the rest scores.
+            if first_vowel(cores[a]) != first_vowel(cores[b]):
+                r = min(r, DIVERGENT_BELOW - 0.01)
             if r < worst[0]:
                 worst = (r, a, b)
     return rows, worst
