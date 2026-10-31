@@ -10,6 +10,7 @@ exit 0 means requested machine checks ran, not that a name is suitable.
 """
 
 import argparse
+import base64
 import difflib
 import json
 import os
@@ -124,11 +125,13 @@ def sapi_voice(lang):
 
 
 def speak_sapi(voice, text, wav):
-    text = text.replace("'", "''")
-    ps = ("Add-Type -AssemblyName System.Speech;"
+    # Pass all caller-controlled values as JSON data, never PowerShell source.
+    payload = base64.b64encode(json.dumps({"voice": voice, "text": text, "wav": wav}).encode("utf-8")).decode("ascii")
+    ps = (f"$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{payload}'))|ConvertFrom-Json;"
+          "Add-Type -AssemblyName System.Speech;"
           "$s=New-Object System.Speech.Synthesis.SpeechSynthesizer;"
-          f"$s.SelectVoice('{voice}');$s.Rate=-1;"
-          f"$s.SetOutputToWaveFile('{wav}');$s.Speak('{text}');$s.Dispose()")
+          "$s.SelectVoice($data.voice);$s.Rate=-1;"
+          "$s.SetOutputToWaveFile($data.wav);$s.Speak($data.text);$s.Dispose()")
     subprocess.run(["powershell", "-NoProfile", "-Command", ps],
                    capture_output=True, timeout=60, check=True)
 

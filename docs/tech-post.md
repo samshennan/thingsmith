@@ -15,7 +15,7 @@ The naming is fun for about twenty minutes. Then I start checking domains. The n
 
 I'm naming more things now, often for more than one country. I wanted a way to do the checks without rebuilding the process every time.
 
-So I built Thingsmith, an agent skill for developing names and investigating whether they're worth pursuing.
+So I built Thingsmith: a free, open-source AI naming skill for Claude Code, Codex and Gemini CLI. It develops names and gathers domain, handle and language observations behind a shortlist.
 
 ## The space between a prompt and an agency
 
@@ -86,3 +86,25 @@ Thingsmith is the working name that followed. Its trademark and native-speaker c
 A blacksmith makes things. Thingsmith makes names for things.
 
 The [Thingsmith repository](https://github.com/samshennan/thingsmith) contains the skill and its scripts. Give it your next naming brief, inspect the evidence, and use the shortlist to decide what deserves the next round of checks.
+
+## Questions before you try it
+
+### Can AI check whether a business name is available?
+
+It can gather evidence from domain registries and supported public platforms. That doesn't settle every reservation, hidden account or trademark conflict. Thingsmith separates what a lookup found from what you can actually register.
+
+### Is Thingsmith free, and do I need API keys?
+
+The skill is free under MIT, and its core Python checkers require no API keys. Your agent host may charge for model use. Domain purchases and professional checks are separate costs.
+
+### Can I use it to name something for different countries?
+
+Yes. State the markets and languages in your brief. The tool can investigate meanings and synthetic readings, then prepare questions for native speakers. Ordinary local pronunciation differences need human judgement rather than an automatic rejection.
+
+### How do I start in Claude Code, Codex or Gemini CLI?
+
+Clone the repository and follow its installation instructions. In Claude Code, try `/thingsmith name a product that …` with its audience and markets. For Codex and Gemini CLI, load the included instruction edition from the clone. You can also run the Python checks on names you already have.
+
+### Does it replace a trademark lawyer or a naming agency?
+
+It helps you build and investigate a shortlist. It doesn't provide professional trademark clearance or a human language panel. A bigger agency engagement may include expert research and stakeholder work that a self-run skill doesn't deliver.

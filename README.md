@@ -2,6 +2,8 @@
 
 **A little forge for naming your next big thing.**
 
+A free, open-source AI naming skill for Claude Code, Codex and Gemini CLI, with domain, handle and pronunciation checks.
+
 ![Thingsmith: a welcoming naming workshop with letterpress blocks and a small coral anvil.](assets/images/hero.png)
 
 Finding a name you like is one job. Finding out whether you can use it is another.
@@ -117,6 +119,28 @@ python scripts/context_sheet.py --names exampleone exampletwo --descriptor "your
 ```
 
 These are commands to investigate, not assertions about current availability. Check only the namespaces your project needs. Respect provider restrictions and rate limits; unsupported endpoints can change over time.
+
+## Common questions
+
+### How do I use AI to name a product or company?
+
+Give Thingsmith the product, audience and target markets. It develops naming directions and candidates, then gathers observations behind a shortlist. Start with `/thingsmith name a product that …`. Existing names can go straight to checking.
+
+### Can it check domains and social media handles?
+
+It checks domain registration records and supported public handle/package namespaces. `NO_RECORD_FOUND` means a lookup found no record, not that registration is guaranteed. Some social platforms and hidden accounts require manual checks. Run `python scripts/check_handles.py --list` for coverage.
+
+### Can it find an international brand name?
+
+It screens candidates in the languages and markets you specify, using research and optional synthetic pronunciation tests. Native-speaker feedback is still needed for cultural meaning and practical pronunciation.
+
+### Do I need API keys or a paid naming service?
+
+The core Python checkers need no API keys. The skill is MIT-licensed and free; your agent host may charge for model use. Domains and professional legal/language review can cost money separately. The scripts don't read your API keys or send them with lookups; the agent host retains its own permissions and data settings.
+
+### Does this replace trademark clearance?
+
+No. Domain and handle observations don't establish trademark rights. Thingsmith can organise preliminary conflict research and a brief for an appropriate professional.
 
 ## Project status and contributing
 

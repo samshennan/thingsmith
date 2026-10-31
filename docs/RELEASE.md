@@ -1,6 +1,6 @@
 # Release preparation
 
-Prepared 22 October 2026. Repository visibility is deliberately private.
+Preparation record: 22 October 2026. On 31 October, Sam authorised publishing the first /tech post and making this repository public after its audit. See `SECURITY.md` for the release audit scope.
 
 ## Included
 
@@ -21,7 +21,7 @@ Exit 0 indicates completed requested automated checks, not a claimable name. Man
 
 ## Validation
 
-Local Windows Python 3.10.6: 24 offline tests pass; adapter sync and relative Markdown links pass; `git diff --check` passes. Gitleaks 8.30.1 redacted scans found no matches in the working files or the repository's three pre-change historical commits. These checks don't establish live availability or replace human language/legal work. Hosted CI results are recorded on the review branch/PR.
+Local Windows Python 3.10.6: 25 offline tests pass; adapter sync and relative Markdown links pass; `git diff --check` passes. Gitleaks 8.30.1 redacted scans found no matches in the working files or the repository's three pre-change historical commits. These checks don't establish live availability or replace human language/legal work. Hosted CI results are recorded on the review branch/PR.
 
 ## Owner actions later
 

@@ -1,5 +1,6 @@
 """Offline regressions for observations, ambiguity and partial-result reporting."""
 import contextlib
+import base64
 import importlib.util
 import io
 import json
@@ -131,6 +132,16 @@ class HandleTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
+    def test_sapi_values_are_data_not_powershell_code(self):
+        values = {"voice": "Voice'); Write-Output injected; #", "text": "A name with ’ and ' quotes", "wav": "C:/O'Brien/audio.wav"}
+        with patch.object(speech.subprocess, "run") as run:
+            speech.speak_sapi(values["voice"], values["text"], values["wav"])
+        script = run.call_args.args[0][-1]
+        self.assertNotIn("Write-Output injected", script)
+        self.assertNotIn("O'Brien", script)
+        payload = script.split("FromBase64String('", 1)[1].split("')", 1)[0]
+        self.assertEqual(json.loads(base64.b64decode(payload)), values)
+
     def test_cli_rejects_bad_input_before_network(self):
         for module, args in ((domains, ["--names", "bad/name"]),
                              (domains, ["--names", "example", "--attempts", "0"]),
