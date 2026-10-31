@@ -91,7 +91,7 @@ git clone https://github.com/samshennan/thingsmith.git "$HOME\.claude\skills\thi
 git clone https://github.com/samshennan/thingsmith.git ~/.claude/skills/thingsmith
 ```
 
-If the repository is private, cloning requires authorised GitHub access. If that destination already exists, update the existing clone rather than cloning over it.
+If that destination already exists, update the existing clone rather than cloning over it.
 
 **Codex / Gemini CLI:** clone to a location of your choice and explicitly load its `AGENTS.md` / `GEMINI.md` as task instructions. These are generated editions of the same skill, not a claim of automatic discovery by every host. Keep your host's permissions and approval settings.
 
@@ -155,7 +155,7 @@ python -B -m unittest discover -s tests -v
 python -B scripts/sync_adapters.py --check
 ```
 
-See [contributing](CONTRIBUTING.md), the [media kit](docs/media-kit.md) and the [tech post draft](docs/tech-post.md). Edit `SKILL.md`, then regenerate the shipped adapters with `python -B scripts/sync_adapters.py`.
+See [contributing](CONTRIBUTING.md), the [media kit](docs/media-kit.md) and the [Thingsmith field note](https://www.samshennan.com/tech/blog/thingsmith/) ([article source](docs/tech-post.md)). Edit `SKILL.md`, then regenerate the shipped adapters with `python -B scripts/sync_adapters.py`.
 
 ## Want help finishing?
 

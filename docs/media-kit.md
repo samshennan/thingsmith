@@ -16,7 +16,7 @@ Use the [style and palette](../assets/STYLE.md) for future illustrations. The as
 
 ## /tech thumbnails
 
-Primary launch post: use the forge thumbnail. For an evidence-focused technical angle, use the availability thumbnail. Both are wide compositions with large type; preserve the whole composition when placing them in a blog card. No live blog site was changed.
+Primary launch post: use the forge thumbnail. For an evidence-focused technical angle, use the availability thumbnail. Both are wide compositions with large type; preserve the whole composition when placing them in a blog card. The forge thumbnail accompanies [the first /tech field note](https://www.samshennan.com/tech/blog/thingsmith/).
 
 ![Thingsmith — Name your next thing](../assets/marketing/tech-thumbnail-forge.png)
 

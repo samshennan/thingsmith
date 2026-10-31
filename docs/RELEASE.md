@@ -1,4 +1,4 @@
-# Release preparation
+# Public release
 
 Preparation record: 22 October 2026. On 31 October, Sam authorised publishing the first /tech post and making this repository public after its audit. See `SECURITY.md` for the release audit scope.
 
@@ -11,7 +11,7 @@ Preparation record: 22 October 2026. On 31 October, Sam authorised publishing th
 - Direct name-check mode, market-specific constraints and /80 creative comparison separated from evidence.
 - Structured RDAP parsing, conservative WHOIS negatives, unresolved hidden-handle cases and partial-result evidence.
 - Offline regression tests and Windows/Linux Python 3.9/3.13 CI configuration.
-- A complete /tech post draft and media kit. No blog site has been published or edited.
+- The [first /tech field note](https://www.samshennan.com/tech/blog/thingsmith/), its article source and an illustrated media kit.
 
 ## Compatibility note
 
@@ -21,10 +21,10 @@ Exit 0 indicates completed requested automated checks, not a claimable name. Man
 
 ## Validation
 
-Local Windows Python 3.10.6: 25 offline tests pass; adapter sync and relative Markdown links pass; `git diff --check` passes. Gitleaks 8.30.1 redacted scans found no matches in the working files or the repository's three pre-change historical commits. These checks don't establish live availability or replace human language/legal work. Hosted CI results are recorded on the review branch/PR.
+Local Windows Python 3.10.6: 25 offline tests pass; adapter sync and relative Markdown links pass; `git diff --check` passes. Gitleaks 8.30.1 redacted scans found no matches in the working files or scanned repository history. These checks don't establish live availability or replace human language/legal work. Windows/Linux Python 3.9/3.13 CI passed for [the audited release](https://github.com/samshennan/thingsmith/pull/1).
 
-## Owner actions later
+## Publication
 
-Review/merge the release branch and choose when to change repository visibility. Publication is intentionally deferred. Use `assets/marketing/tech-thumbnail-forge.png` for the launch blog card and the evidence thumbnail for an availability-focused angle. Set the blog draft's publication metadata in the actual site when publishing.
+Sam approved publication on 31 October 2026. The audited release was merged and the repository made public. The first /tech field note uses `assets/marketing/tech-thumbnail-forge.png`; the evidence thumbnail remains available for an availability-focused angle.
 
 Thingsmith itself is still a working name; its own native-speaker and trademark work remains disclosed. Don't turn historical name checks into current availability claims.
