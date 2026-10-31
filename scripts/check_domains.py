@@ -1,40 +1,16 @@
 #!/usr/bin/env python3
-"""Domain availability checker for the thingsmith skill.
+"""Domain registration observations for Thingsmith.
 
-Four rules this script exists to enforce.
-
-1. Never bare DNS for availability. A registered-but-unhosted domain returns
-   NXDOMAIN and would misreport as free. DNS is used here only as a one-way
-   TAKEN proof: NS records present means registered, full stop. Absence of NS
-   proves nothing and is never reported as free.
-
-2. A 404 from a resolver that has no RDAP service for that TLD is not an
-   answer. rdap.org returns a bare, bodyless 404 both for "domain not found"
-   and for "I have no server for .io" -- indistinguishable. v1 of this script
-   read that as FREE, which silently reported every .io and .co candidate as
-   available. This version resolves the TLD to a verified registry RDAP
-   endpoint and never treats an unmapped TLD as free.
-
-3. When RDAP is missing or throttled, fall through to port-43 WHOIS with the
-   server discovered from whois.iana.org. .pl RDAP hard-429s from outside a
-   registrar; .co and .eu publish no RDAP at all. All three answer WHOIS
-   cleanly. Without this layer a third of a European sweep is unanswerable.
-
-4. Anything unresolved is UNVERIFIED or UNSUPPORTED, and the process exits
-   non-zero. A caller must not be able to mistake an incomplete sweep for a
-   clean one.
-
-Ladder per domain:  DNS NS  ->  registry RDAP  ->  port-43 WHOIS  ->  UNVERIFIED
-
-Usage:
-    python check_domains.py --names ritka karbia zyla --tlds com pl io ai
-    python check_domains.py --names ritka --tlds com pl io ai co eu app dev \
-        --csv out.csv --json out.json
-    python check_domains.py --tld-report --tlds com pl io co eu de me au com.au
+DNS NS is one-way taken evidence. Structured registry RDAP and query-specific
+WHOIS responses can show a matching registration or NO_RECORD_FOUND. A missing
+record never confirms that a registrar can sell a domain: price, reservations
+and eligibility remain separate checks. Unresolved requested checks exit 1;
+exit 0 means the automated observations completed, not legal or purchase clearance.
 """
 
 import argparse
 import csv
+from datetime import datetime, timezone
 import json
 import os
 import re
@@ -73,17 +49,8 @@ WHOIS_EXTRAS = {
     "co": "whois.registry.co",   # whois.nic.co does not resolve
 }
 
-FREE, TAKEN, UNVERIFIED, UNSUPPORTED = "FREE", "taken", "UNVERIFIED", "UNSUPPORTED"
+NO_RECORD, TAKEN, UNVERIFIED, UNSUPPORTED = "NO_RECORD_FOUND", "taken", "UNVERIFIED", "UNSUPPORTED"
 
-# Case-insensitive substrings that mean "this domain is not registered".
-NOT_FOUND = [
-    "no match", "not found", "no data found", "no entries found",
-    "no object found", "nothing found", "does not exist",
-    "no information available about domain name",
-    "status: available", "status:      available", "status: free",
-    "available for registration", "not registered", "no such domain",
-    "domain status: no object found",
-]
 # Substrings that mean the server refused rather than answered.
 THROTTLED = [
     "rate limit", "quota exceeded", "exceeded", "too many requests",
@@ -213,7 +180,7 @@ def rdap_probe(base, domain, timeout=20):
     req = urllib.request.Request(url, headers=_UA)
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=_ctx) as r:
-            return r.status, r.read(4096)
+            return r.status, r.read(1_000_000)
     except urllib.error.HTTPError as e:
         try:
             return e.code, e.read(2048)
@@ -239,14 +206,8 @@ def whois_query(server, query, timeout=15):
         return None
 
 
-def read_whois(text):
-    """Classify a WHOIS body. Returns (status, detail).
-
-    Order matters and is the whole safety argument: throttling first (a refusal
-    is not an answer), then fields that can only exist on a live registration,
-    then the not-found vocabulary, then weak record shape. Reversing the middle
-    two turns a disclaimer containing "not found" into a false FREE.
-    """
+def read_whois(text, domain=None):
+    """Require a matching record or an anchored, query-specific negative response."""
     if text is None:
         return UNVERIFIED, "whois unreachable"
     low = text.lower()
@@ -258,19 +219,43 @@ def read_whois(text):
     for pat in THROTTLED:
         if pat in low:
             return UNVERIFIED, f"whois throttled: '{pat}'"
-    for pat in STRONG_REGISTERED:
-        if pat in blow:
-            return TAKEN, f"whois: '{pat}'"
-    for pat in NOT_FOUND:
-        if pat in blow:
-            return FREE, f"whois: '{pat}'"
-    for pat in NOT_FOUND:            # some servers answer only in a comment
-        if pat in low:
-            return FREE, f"whois comment: '{pat}'"
-    for pat in WEAK_REGISTERED:
-        if pat in blow:
-            return TAKEN, "whois record present"
+    records = re.findall(r"^domain(?: name)?\s*:\s*(\S+)", blow, re.M)
+    if records:
+        if domain and domain.lower().rstrip(".") in [r.rstrip(".") for r in records]:
+            return TAKEN, "whois record matches queried domain"
+        return UNVERIFIED, "whois record does not identify the queried domain"
+    # Trust only complete, query-specific negative lines, not disclaimer prose.
+    if domain:
+        quoted = re.escape(domain.lower())
+        patterns = [
+            rf'no match for "{quoted}"\.?',
+            rf"no entries found for (?:domain )?{quoted}\.?",
+            rf"no information available about domain name {quoted}(?: in the registry nask database)?\.?",
+        ]
+        if any(re.fullmatch(p, line.strip()) for p in patterns for line in blow.splitlines()):
+            if any(p in blow for p in STRONG_REGISTERED + WEAK_REGISTERED):
+                return UNVERIFIED, "contradictory whois response"
+            return NO_RECORD, "whois query-specific no-record response; registration unconfirmed"
     return UNVERIFIED, "whois reply unparsed"
+
+
+def read_rdap(code, body, domain):
+    """Interpret structured registry evidence, never substring matches or HTML 404s."""
+    try:
+        doc = json.loads(body)
+    except (ValueError, UnicodeError):
+        return UNVERIFIED, "rdap response is not complete JSON"
+    if not isinstance(doc, dict):
+        return UNVERIFIED, "rdap response is not an object"
+    if "errorCode" in doc:
+        if code == 404 and doc["errorCode"] == 404 and not any(
+                k in doc for k in ("objectClassName", "ldhName", "unicodeName")):
+            return NO_RECORD, "registry rdap 404/no-record; registration unconfirmed"
+        return UNVERIFIED, "rdap error or contradictory object"
+    if (code == 200 and doc.get("objectClassName") == "domain"
+            and str(doc.get("ldhName", "")).lower().rstrip(".") == domain.lower().rstrip(".")):
+        return TAKEN, "rdap domain object matches query"
+    return UNVERIFIED, "rdap object does not identify the queried domain"
 
 
 # --------------------------------------------------------------------------
@@ -285,12 +270,13 @@ def check_one(domain, tld, rdap_base, whois_server, attempts=2, base_sleep=5.0):
         for attempt in range(attempts):
             code, body = rdap_probe(rdap_base, domain)
             last = code
-            if code == 404:
-                return FREE, "rdap 404", "rdap"
-            if code == 200:
-                if b'"errorCode"' in body and b"404" in body:
-                    return FREE, "rdap 200/errorCode 404", "rdap"
-                return TAKEN, "rdap 200", "rdap"
+            if code in (200, 404):
+                status, detail = read_rdap(code, body, domain)
+                if status != UNVERIFIED:
+                    return status, detail, "rdap"
+                if "contradictory" in detail:
+                    return UNVERIFIED, detail, "rdap"
+                break
             if code in (400, 422):
                 break  # malformed for this registry; try whois
             if attempt < attempts - 1:
@@ -300,8 +286,8 @@ def check_one(domain, tld, rdap_base, whois_server, attempts=2, base_sleep=5.0):
         rdap_note = "no rdap"
 
     if whois_server:
-        status, detail = read_whois(whois_query(whois_server, domain))
-        if status in (FREE, TAKEN):
+        status, detail = read_whois(whois_query(whois_server, domain), domain)
+        if status in (NO_RECORD, TAKEN):
             return status, f"{detail} [{rdap_note}]", "whois"
         return UNVERIFIED, f"{detail} [{rdap_note}]", "whois"
 
@@ -320,13 +306,21 @@ def run(jobs, per_host_sleep, attempts):
 
     def worker(items):
         for i, job in enumerate(items):
-            status, detail, source = check_one(
-                job["domain"], job["tld"], job["rdap"], job["whois"],
-                attempts=attempts)
-            job.update(status=status, detail=detail, source=source)
+            try:
+                status, detail, source = check_one(
+                    job["domain"], job["tld"], job["rdap"], job["whois"],
+                    attempts=attempts)
+            except Exception as error:
+                status, detail, source = UNVERIFIED, f"probe error: {type(error).__name__}: {error}", "none"
+            endpoint = (f"{job['rdap']}/domain/{job['domain']}" if source == "rdap"
+                        else job["whois"] if source == "whois"
+                        else f"DNS NS {job['domain']}" if source == "dns" else None)
+            job.update(status=status, detail=detail, source=source, endpoint=endpoint,
+                       checked_at=datetime.now(timezone.utc).isoformat(),
+                       parser_version=2, claimability="UNCONFIRMED")
             with lock:
                 results.append(job)
-                flag = "*" if status == FREE else " "
+                flag = "*" if status == NO_RECORD else " "
                 print(f"{flag} {job['domain']:<26} {status:<12} {source:<6} "
                       f"{detail}", flush=True)
             if source in ("rdap", "whois") and i < len(items) - 1:
@@ -357,6 +351,20 @@ def main():
                     help="show how each TLD will be resolved, then exit")
     args = ap.parse_args()
 
+    if not args.names and not args.tld_report:
+        ap.error("--names is required unless --tld-report is used")
+    if args.sleep < 0 or args.attempts < 1:
+        ap.error("--sleep must be non-negative and --attempts must be at least 1")
+    label = r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"
+    args.tlds = list(dict.fromkeys(t.lower().lstrip(".") for t in args.tlds))
+    if any(not re.fullmatch(rf"{label}(?:\.{label})*", t) for t in args.tlds):
+        ap.error("--tlds must contain ASCII domain suffixes, such as com or com.au")
+    if args.names:
+        args.names = list(dict.fromkeys(n.lower() for n in args.names))
+        if any(not re.fullmatch(label, n) or len(n + "." + t) > 253
+               for n in args.names for t in args.tlds):
+            ap.error("--names must contain bare ASCII domain labels (use IDNA/punycode for international domains)")
+
     bootstrap = load_bootstrap(refresh=args.refresh_bootstrap)
     wcache = _load_json(WHOIS_CACHE)
 
@@ -378,31 +386,33 @@ def main():
     blind = sorted({j["tld"] for j in jobs if not j["rdap"] and not j["whois"]})
     if blind:
         print(f"! no endpoint at all for: {', '.join(blind)} -- these report "
-              f"UNSUPPORTED, never FREE. Check them at a registrar by hand.\n")
+              f"UNSUPPORTED, never available. Check them at a registrar by hand.\n")
 
     t0 = time.time()
     results = run(jobs, args.sleep, args.attempts)
     results.sort(key=lambda r: (args.names.index(r["name"]),
                                 args.tlds.index(r["tld"])))
 
-    free = [r["domain"] for r in results if r["status"] == FREE]
+    no_record = [r["domain"] for r in results if r["status"] == NO_RECORD]
     unver = [r["domain"] for r in results if r["status"] == UNVERIFIED]
     unsup = [r["domain"] for r in results if r["status"] == UNSUPPORTED]
 
     print(f"\n--- summary ({len(results)} lookups in {time.time() - t0:.0f}s) ---")
-    print(f"FREE ({len(free)}): {', '.join(free) or 'none'}")
+    print(f"NO_RECORD_FOUND ({len(no_record)}): {', '.join(no_record) or 'none'}")
+    print("No record found is not registration confirmation. Check registrar price, eligibility and reservations.")
     if unver:
         print(f"UNVERIFIED ({len(unver)}): {', '.join(unver)}")
-        print("  ^ NOT available. Re-run before reporting.")
+        print("  ^ Availability unresolved. Re-check or ask the registry/registrar.")
     if unsup:
         print(f"UNSUPPORTED ({len(unsup)}): {', '.join(unsup)}")
-        print("  ^ no endpoint for that TLD. NOT a free result.")
+        print("  ^ No endpoint for this TLD. Check with the registry/registrar.")
 
     if args.csv:
         with open(args.csv, "w", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(fh, extrasaction="ignore",
                                fieldnames=["name", "tld", "domain", "status",
-                                           "source", "detail"])
+                                           "source", "detail", "endpoint", "checked_at",
+                                           "parser_version", "claimability"])
             w.writeheader()
             w.writerows(results)
         print(f"\nwrote {args.csv}")

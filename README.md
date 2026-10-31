@@ -1,233 +1,162 @@
 # Thingsmith
 
-**A naming agency's method, packaged as an agent skill.** Give it what you are naming and
-who it is for. It runs the process professional naming houses use: brief, competitor map,
-territories, four competing generation teams, trap screening, a scorecard, and then
-availability checks built never to report something as free unless they have proof. It
-stages the decision with the evidence underneath. It never chooses for you.
+**A little forge for naming your next big thing.**
 
-> Working name. `thingsmith` passed the skill's own checks (domains, handles, radio test),
-> but the trademark knockout and native-speaker checks are still open. Formerly `namesmith`,
-> which collides with a live AI name generator at namesmith.app.
+A free, open-source AI naming skill for Claude Code, Codex and Gemini CLI, with domain, handle and pronunciation checks.
 
-Built for Claude Code. `AGENTS.md` (Codex) and `GEMINI.md` (Gemini CLI) carry the same
-skill for those agents.
+![Thingsmith: a welcoming naming workshop with letterpress blocks and a small coral anvil.](assets/images/hero.png)
 
----
+Finding a name you like is one job. Finding out whether you can use it is another.
 
-## What you get
+Thingsmith is a free agent skill for naming products, brands and companies across markets. It develops candidates and gathers domain, handle and language observations behind a usable shortlist. You get the reasoning, the rejection log and the checks that still need a human.
 
-- A **naming document**: the brief, the competitor map, territories, candidates with
-  their derivations, a scorecard, verification evidence, and a **KILLED list** that gives
-  the specific reason each name was dropped.
-- A **names-in-context sheet**: one HTML page showing every finalist, plus competitors
-  for scale, in nine identical real-world scenes.
-- **Domain and handle sweeps** with proof for every result. Anything unresolved prints
-  `UNVERIFIED`.
-- A **pronunciation screen**: per-language cold readings plus a machine radio test.
-- A **native-speaker form**, ready to send to real people in each market.
+I built it because I kept needing international names and getting stuck in the same loop: a promising idea, a taken domain, another idea, an awkward meaning somewhere else.
 
----
+## Try it
+
+In Claude Code:
+
+```text
+/thingsmith a tool that helps small studios find public tenders, for the UK and Poland
+```
+
+Already have a name? Ask directly:
+
+```text
+/thingsmith check thingsmith: .com and .io, GitHub and npm; markets UK and Poland
+```
+
+That goes straight to investigation. A naming request starts with a brief and develops candidates. A comparison request can work with your existing shortlist.
+
+The skill is free under [MIT](LICENSE). Your agent's model usage, domain purchases and professional checks may cost money.
+
+## What comes back
+
+![A maker sorts a tray of wooden blocks into a small considered shortlist.](assets/images/naming-workflow.png)
+
+A report records the brief and candidate derivations, with creative comparisons and a rejection log. A neutral HTML sheet shows finalists in the same everyday situations, alongside competitors. You choose what to pursue.
+
+The process is: brief → competitor map → territories → generate → screen → compare → investigate → present.
+
+Compact scope targets 40–60 distinct ideas. Full scope targets 150+ using differently briefed generators where supported. These are effort budgets, not quality guarantees. The report states what actually ran, including models, isolation and skipped checks.
+
+## Check the evidence
+
+![A maker investigates a name with evidence cards for a conflict, an unknown and a documented observation.](assets/images/evidence-checks.png)
+
+The scripts inspect registration and public-platform records. They distinguish what was observed from whether you can claim something:
+
+| Result | Meaning |
+|---|---|
+| `taken` | A registration or public record was found |
+| `NO_RECORD_FOUND` | This lookup found no record; registration or claiming remains unconfirmed |
+| `UNVERIFIED` | Ambiguous response, hidden-holder possibility, blocked request or failed lookup |
+| `UNSUPPORTED` | This tool cannot perform the check |
+| `INVALID` | Input doesn't fit a supported platform rule |
+| `MANUAL` | A human/provider check remains open |
+
+A missing DNS record never proves a domain can be registered. A missing public profile never guarantees a handle can be claimed. Reservations, premium pricing and eligibility still matter. Evidence exports record timestamps and sources; old results need re-checking.
+
+Exit 0 means the requested automated checks completed. It doesn't mean the name is suitable or available. Manual work remains listed separately. Exit 1 means requested observations are unresolved, unsupported or invalid; exit 2 means a CLI usage error. Pronunciation tools use exit 0 for completed machine checks even when a transcript differs.
+
+## Say it in the markets that matter
+
+![Three people try names aloud and listen for different readings around a workshop table.](assets/images/say-it-together.png)
+
+An optional speech tool reads candidates using language-specific voices, then transcribes the speech without supplying the spelling. It flags possible spelling or pronunciation trouble. A machine mismatch is a reason to investigate; ordinary local accents don't have to sound identical.
+
+The included [native-speaker form](assets/native-speaker-check.md) helps you get real feedback. A machine PASS isn't human validation. Preliminary trademark research also leaves professional clearance outstanding.
+
+## Between a brainstorm and a naming agency
+
+Asking ChatGPT for names is a useful start. Thingsmith adds a repeatable process, scripts for investigating the shortlist and a record of what remains unknown.
+
+At the other end, Lexicon publishes an average project fee of **US$75,000–$150,000** for its professional naming engagement. That's a price anchor, not a claim that this skill provides equivalent work. [Lexicon's process and pricing](https://www.lexiconbranding.com/brand-naming-process/) (checked 22 October 2026).
+
+Thingsmith is for the work between those options: moving beyond suggestions without buying a full agency engagement.
 
 ## Install
 
-### 1. Put the skill where your agent looks
+Requires Python 3.9+ and an agent that can read instructions and run local scripts. No API key is required by the core checkers. They make outbound requests to public registries and platforms; your agent host has its own model/data settings. Don't put private naming briefs in public issues.
 
-**Claude Code.** Clone the repo straight into your skills folder:
-
-```bash
-# macOS / Linux
-git clone https://github.com/samshennan/thingsmith.git ~/.claude/skills/thingsmith
-```
+**Claude Code — Windows PowerShell:**
 
 ```powershell
-# Windows (PowerShell)
 git clone https://github.com/samshennan/thingsmith.git "$HOME\.claude\skills\thingsmith"
 ```
 
-If you keep the clone somewhere else, link it instead of copying it, so updates reach the
-skill:
-- macOS / Linux: `ln -s <clone> ~/.claude/skills/thingsmith`
-- Windows: `New-Item -ItemType Junction`
+**Claude Code — macOS/Linux:**
 
-**Codex / Gemini CLI.** Point the agent at `AGENTS.md` or `GEMINI.md` in the clone. The
-scripts run the same way.
-
-### 2. Install the dependencies
-
-Every dependency is optional, and each one unlocks one capability. Without it, the
-matching check prints `UNSUPPORTED` rather than pretending it passed.
-
-| Install | Unlocks | Without it |
-|---|---|---|
-| Python 3.9+ | All scripts (standard library only at the core) | Nothing runs |
-| `pip install dnspython` | Fast DNS rung for domain checks (proof that a domain is taken) | Goes straight to RDAP; slower, still correct |
-| `pip install certifi` | Up-to-date certificate store for handle checks | Docker Hub and others can fail TLS on older Pythons, so they show `UNVERIFIED` |
-| [eSpeak NG](https://github.com/espeak-ng/espeak-ng/releases) (Windows: `winget install eSpeak-NG.eSpeak-NG`; macOS: `brew install espeak-ng`; Linux: `apt install espeak-ng`) | Per-language cold readings (IPA) and fallback text-to-speech | Readings `UNSUPPORTED` |
-| `pip install faster-whisper` | Machine radio test (the model downloads once, ~500 MB for `small`) | Radio test `UNSUPPORTED` |
-| A text-to-speech voice per test language | Radio test in that language. Windows uses installed SAPI voices (Settings → Time & language → Speech); everywhere else uses eSpeak NG | That language `UNSUPPORTED` |
-
-### 3. Smoke test
-
-```bash
-python scripts/check_domains.py --names google zqxvbrnemt --tlds com pl
-python scripts/check_handles.py --names google zqxvbrnemt
-python scripts/say_it.py --names karbia --langs en
+```sh
+git clone https://github.com/samshennan/thingsmith.git ~/.claude/skills/thingsmith
 ```
 
-**What passing looks like:**
-- `google` shows **taken** everywhere and `zqxvbrnemt` shows **FREE**.
-- `UNVERIFIED` on `.pl` means outbound port 43 (WHOIS) is blocked on your network. That
-  tells you about the network, not about the domain.
-- Reddit often blocks scripts. Seeing `UNVERIFIED` there, with exit code 1, is the honest
-  result.
+If the repository is private, cloning requires authorised GitHub access. If that destination already exists, update the existing clone rather than cloning over it.
 
----
+**Codex / Gemini CLI:** clone to a location of your choice and explicitly load its `AGENTS.md` / `GEMINI.md` as task instructions. These are generated editions of the same skill, not a claim of automatic discovery by every host. Keep your host's permissions and approval settings.
 
-## Part 1: finding a name
+Optional dependencies unlock additional capabilities:
 
-Start it in Claude Code with:
+| Install | Capability |
+|---|---|
+| `python -m pip install dnspython` | Fast DNS evidence that a domain is taken |
+| `python -m pip install certifi` | Certificate bundle for handle requests |
+| [eSpeak NG](https://github.com/espeak-ng/espeak-ng/releases) | Language-specific IPA and fallback speech |
+| `python -m pip install faster-whisper` | Synthetic speech-to-text test; downloads a model on first use |
 
-```
-/thingsmith a tender-discovery tool for XR studios, selling in the UK and Poland
-```
+Windows SAPI voices are used when available; eSpeak is the fallback. Missing voices/backends remain explicit. Use `python3` where your system requires it.
 
-You can also just say "help me name this" or "is this name available?". The skill
-triggers on either.
+## Run the scripts yourself
 
-The order is fixed. **Do not check domains first.** Checking early is how people fall in
-love with names they cannot have.
+From the clone:
 
-> **brief → namescape → territories → generate → screen → score → verify → stage**
-
-| # | Stage | What happens | Gate before moving on |
-|---|---|---|---|
-| 0 | **Brief** | About fifteen questions: what the name must do, for whom, in which markets, and what it must never sound like. The agent asks; you answer | The name's job fits in **one sentence** |
-| 1 | **Namescape** | Every competitor's name plotted by type and tone, to find the empty corner of the category | Empty quadrant named |
-| 2 | **Territories** | Four or more metaphor fields to name from, including a **Forge pass** (distant analogy, inversion, collision, impossible-first). One bold territory is kept on purpose | 4+ territories |
-| 3 | **Generate** | **Four isolated teams** that never see each other's work: **A** has the real brief; **B** has a decoy brief, the same job disguised as another company or category (Lexicon's Zune method); **C** has only the Forge territories; **D** gets one line and nothing else. Every candidate is tagged with its team, mechanic and source word | **150+** raw candidates, all four name types |
-| 4 | **Screen** | Form rules, readings in four languages, the trap register (slang, slurs, medical meanings, false friends, famous people, existing packages), and the radio test | **40+** survivors, with a KILLED list giving the reason for each cut |
-| 5 | **Score** | A 90-point scorecard, run on every survivor | **8–15** survive |
-| 6 | **Verify** | Domains, handles, trademark knockout, collision search, all with evidence | Every result proven or marked `UNVERIFIED` |
-| 7 | **Stage** | The naming document plus the in-context sheet. The skill presents the evidence and stops | You choose |
-
-If a stage comes up short (say, 60 candidates rather than 150), the report says so instead
-of pretending the full process ran.
-
-### Running the tools yourself
-
-The agent calls these scripts during the run. You can also use them on their own to check a
-name you already have.
-
-```bash
-# Domains: DNS proof of "taken" → registry RDAP → port-43 WHOIS → UNVERIFIED
-python scripts/check_domains.py --names ritka karbia --tlds com io ai co pl --csv domains.csv
-python scripts/check_domains.py --tld-report --tlds com io co eu   # which TLDs are answerable
-
-# Handles: 12 platforms automated, the rest listed as manual (never as clear)
-python scripts/check_handles.py --names ritka karbia --json handles.json
+```text
+python scripts/check_domains.py --names thingsmith --tlds com io --json domains.json
+python scripts/check_handles.py --names thingsmith --only github npm pypi --json handles.json
 python scripts/check_handles.py --list
-
-# Pronunciation: cold readings per language + machine radio test
-python scripts/say_it.py --names karbia zyla --langs en pl de --readings-only
-python scripts/say_it.py --names karbia zyla --langs en pl
-
-# Names in context: nine scenes, one neutral font, competitors for scale
-python scripts/context_sheet.py --names karbia ritka namira \
-  --descriptor "tender discovery for XR studios" --competitors Mimira --shuffle \
-  --sender "Your Name" --out shortlist.html
+python scripts/say_it.py --names thingsmith --langs en pl --readings-only
+python scripts/context_sheet.py --names exampleone exampletwo --descriptor "your product description" --competitors Example --shuffle --sender "Your Name" --out shortlist.html
 ```
 
-Every script exits non-zero if anything is unresolved, so a partial sweep can't be passed
-off as a clean one.
+These are commands to investigate, not assertions about current availability. Check only the namespaces your project needs. Respect provider restrictions and rate limits; unsupported endpoints can change over time.
 
-### How to read the results
+## Common questions
 
-- **A machine FAIL is strong evidence; a machine PASS is weak evidence.** If a synthetic voice
-  and Whisper can't get the spelling across, people on a phone line won't either. A pass
-  still needs humans. Real catches from the radio test:
-  - `karbia` was heard as "Carbia", so every verbal handoff leaks the spelling.
-  - `zyla` was heard as "Żyła", which is Polish for "vein".
-- **Native speakers are the clearance.** Send `assets/native-speaker-check.md` to three
-  speakers per language, each living in that country now. One credible bad-meaning report
-  kills a name; don't average it away.
-- **Judge in context.** On the context sheet, ask "which of these *work*, and why?", not
-  "which do you like?"
-- **A trademark knockout is not legal clearance.** It finds obvious conflicts cheaply,
-  before you pay a lawyer to find subtle ones.
-- **Live with it for a week.** Say it, type it, sign emails with it, before buying anything.
+### How do I use AI to name a product or company?
 
-### What it can't do for you
+Give Thingsmith the product, audience and target markets. It develops naming directions and candidates, then gathers observations behind a shortlist. Start with `/thingsmith name a product that …`. Existing names can go straight to checking.
 
-It can't do the human steps: native-speaker panels, an association test with people who
-have never seen the brief, a trademark lawyer's opinion, or quietly buying a domain someone
-else owns. The report names each of these as an open step. It never marks one as done.
+### Can it check domains and social media handles?
 
----
+It checks domain registration records and supported public handle/package namespaces. `NO_RECORD_FOUND` means a lookup found no record, not that registration is guaranteed. Some social platforms and hidden accounts require manual checks. Run `python scripts/check_handles.py --list` for coverage.
 
-## Part 2: pulling the trigger
+### Can it find an international brand name?
 
-Once you've chosen, the clock starts. Domains, handles and trademark priority all go to
-whoever moves first.
+It screens candidates in the languages and markets you specify, using research and optional synthetic pronunciation tests. Native-speaker feedback is still needed for cultural meaning and practical pronunciation.
 
-1. **Re-check on the day you buy.** A two-week-old sweep proves nothing.
-2. **Domains.** Register the main domain and a few typo or variant domains chosen from
-   evidence, such as the spellings the radio test actually heard. Redirect them all
-   permanently (301) to the main site. Turn on WHOIS privacy, registrar lock and auto-renew.
-   **Confirm the registrant email within 15 days**, or the registrar suspends the domain.
-3. **Lock down the parked domains.** Every domain that won't send email gets a null MX
-   record, an SPF record of `v=spf1 -all`, and DMARC set to `p=reject`. Typo domains are a
-   phishing tool, aimed at your own customers.
-4. **Handles.** Claim them by hand, using the manual list from `check_handles.py --list`.
-   Bot sign-ups break the rules on X, Instagram and TikTok, and are an easy way to lose the
-   handle. Don't publish placeholder packages to reserve names; npm and PyPI treat that as
-   squatting.
-5. **Trademark.** Give a lawyer the mark, the Nice classes, the goods description, the
-   jurisdictions and your knockout evidence. They file it.
-6. **Watch.** Set up alerts for newly registered look-alike domains and new trademark
-   filings.
+### Do I need API keys or a paid naming service?
 
-### Or have it done for you
+The core Python checkers need no API keys. The skill is MIT-licensed and free; your agent host may charge for model use. Domains and professional legal/language review can cost money separately. The scripts don't read your API keys or send them with lookups; the agent host retains its own permissions and data settings.
 
-[**Moonacle**](https://moonacle.com) runs this process as a done-for-you service. That
-covers:
-- the human checks: a native-speaker panel and an association test;
-- the trademark brief for your lawyer;
-- buying the domains quietly and setting up DNS and email lockdown;
-- securing the handles.
+### Does this replace trademark clearance?
 
-Every purchase and filing waits for your sign-off. Email
-**[contact@moonacle.com](mailto:contact@moonacle.com)** with what you're naming and where it
-will sell.
+No. Domain and handle observations don't establish trademark rights. Thingsmith can organise preliminary conflict research and a brief for an appropriate professional.
 
----
+## Project status and contributing
 
-## Layout
+Early release. Thingsmith itself remains a working name; its trademark and native-speaker checks are open. Historical domain/handle checks don't settle current availability.
 
-```
-SKILL.md                     the skill: stages, rules, commands (Claude Code)
-AGENTS.md / GEMINI.md        same skill for Codex / Gemini (generated from SKILL.md)
-references/01-09             one file per stage; the agent loads each when it reaches that stage
-assets/report-template.md    the naming document
-assets/native-speaker-check.md   send-ready form for native speakers
-scripts/check_domains.py     RDAP/WHOIS domain checker
-scripts/check_handles.py     handle checker, 12 platforms + a manual list
-scripts/say_it.py            cold readings + machine radio test
-scripts/context_sheet.py     names-in-context HTML sheet
+The method lives in [SKILL.md](SKILL.md), stage guidance in `references/`, tools in `scripts/`, and templates in `assets/`. External methods are credited in [sources](references/09-sources.md); the agencies haven't endorsed this project.
+
+Run offline checks with:
+
+```text
+python -B -m unittest discover -s tests -v
+python -B scripts/sync_adapters.py --check
 ```
 
-`references/09-sources.md` lists the research the method rests on (Catchword, Lexicon, Igor,
-Siegel+Gale and others), with the specific claim each source supports.
+See [contributing](CONTRIBUTING.md), the [media kit](docs/media-kit.md) and the [tech post draft](docs/tech-post.md). Edit `SKILL.md`, then regenerate the shipped adapters with `python -B scripts/sync_adapters.py`.
 
-## Optional companions
+## Want help finishing?
 
-`SKILL.md` mentions `veles-forge` (generating territories), `polonize` (Polish-language
-checks) and a brand skill (identity work once a name is chosen). They aren't in this repo.
-Without them, the skill runs the Forge moves itself and skips the rest.
-
-## Maintenance
-
-- After editing `SKILL.md`, regenerate `AGENTS.md` and `GEMINI.md` (`python _SHARED/scripts/skill-adapt.py
-  skills/thingsmith` in the source workspace), or they drift out of sync.
-- Don't commit `scripts/.rdap-bootstrap.json` or `scripts/.whois-servers.json`. They are
-  per-machine caches, and they're gitignored.
+[Moonacle](https://moonacle.com) offers a done-for-you route. Contact [contact@moonacle.com](mailto:contact@moonacle.com) with what you're naming and where it will sell to discuss scope.

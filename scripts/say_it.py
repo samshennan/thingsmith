@@ -1,42 +1,16 @@
 #!/usr/bin/env python3
-"""Pronunciation screen for the thingsmith skill: readings + an automated radio test.
+"""Synthetic pronunciation screening for Thingsmith.
 
-Two tests, both machine stand-ins for human tests in references/06-screening.md.
-Neither replaces three native speakers resident in-country. Both are cheap
-enough to run on every survivor of the form screen.
-
-1. READINGS (the four-language test, automated)
-   eSpeak NG applies each language's spelling-to-sound rules to the bare
-   name, the way a native reader meets it cold on a sign. Each reading is
-   printed as IPA, and the readings are compared. If two markets read the
-   spelling very differently, the name is two brands wearing one spelling:
-   DIVERGENT. That is a kill in the skill, not a deduction.
-
-2. RADIO (say it once, can the listener spell it?)
-   The name is spoken inside a carrier sentence ("The company is called X.")
-   by a text-to-speech voice for each language, then transcribed by Whisper
-   with NO hint of the spelling. If the transcript spells the name back, PASS.
-   If it hears a different word, FAIL, and the heard spelling is printed,
-   because that is the spelling customers will type into a search box.
-   Synthetic voices are cleaner than a phone call and Whisper is better than a
-   distracted listener, so a FAIL here is strong evidence and a PASS is weak.
-
-Anything that could not run (no voice for a language, no eSpeak, no Whisper)
-is UNSUPPORTED, printed as itself, and the process exits non-zero, so a partial
-screen cannot be handed over as a complete one.
-
-Backends, best first:
-  TTS:  Windows SAPI voice for the language  ->  eSpeak NG voice  ->  UNSUPPORTED
-  IPA:  eSpeak NG (`espeak-ng --ipa`)                              ->  UNSUPPORTED
-  ASR:  faster-whisper (`pip install faster-whisper`; model downloads once)
-
-Usage:
-    python say_it.py --names karbia zyla --langs en pl de
-    python say_it.py --names karbia --readings-only
-    python say_it.py --names karbia --langs en pl --model small --json say.json
+--readings-only obtains eSpeak IPA per language. Full mode speaks names with
+Windows SAPI or eSpeak and transcribes with faster-whisper. REVIEW, a different
+transcript or a machine FAIL suggests a human follow-up, never an automatic
+rejection. Ordinary local pronunciations can differ. PASS validates only this
+machine test. Missing backends/languages are UNSUPPORTED and cause exit 1;
+exit 0 means requested machine checks ran, not that a name is suitable.
 """
 
 import argparse
+import base64
 import difflib
 import json
 import os
@@ -59,7 +33,7 @@ CARRIERS = {
 }
 SAPI_CULTURE = {"en": "en-", "pl": "pl-PL", "de": "de-DE", "fr": "fr-FR",
                 "es": "es-ES", "it": "it-IT", "nl": "nl-NL", "pt": "pt-"}
-DIVERGENT_BELOW = 0.60   # pairwise IPA similarity; below this two markets say different words
+DIVERGENT_BELOW = 0.60   # exploratory similarity threshold; not validated human accuracy
 ESPEAK_PATHS = [r"C:\Program Files\eSpeak NG\espeak-ng.exe",
                 r"C:\Program Files (x86)\eSpeak NG\espeak-ng.exe"]
 
@@ -151,11 +125,13 @@ def sapi_voice(lang):
 
 
 def speak_sapi(voice, text, wav):
-    text = text.replace("'", "''")
-    ps = ("Add-Type -AssemblyName System.Speech;"
+    # Pass all caller-controlled values as JSON data, never PowerShell source.
+    payload = base64.b64encode(json.dumps({"voice": voice, "text": text, "wav": wav}).encode("utf-8")).decode("ascii")
+    ps = (f"$data=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{payload}'))|ConvertFrom-Json;"
+          "Add-Type -AssemblyName System.Speech;"
           "$s=New-Object System.Speech.Synthesis.SpeechSynthesizer;"
-          f"$s.SelectVoice('{voice}');$s.Rate=-1;"
-          f"$s.SetOutputToWaveFile('{wav}');$s.Speak('{text}');$s.Dispose()")
+          "$s.SelectVoice($data.voice);$s.Rate=-1;"
+          "$s.SetOutputToWaveFile($data.wav);$s.Speak($data.text);$s.Dispose()")
     subprocess.run(["powershell", "-NoProfile", "-Command", ps],
                    capture_output=True, timeout=60, check=True)
 
@@ -246,7 +222,9 @@ def main():
                     if v is None:
                         unresolved += 1
                     print(f"  read  {l}  /{v}/" if v else f"  read  {l}  UNSUPPORTED")
-                verdict = ("DIVERGENT" if la and score < DIVERGENT_BELOW else "converges")
+                verdict = ("UNSUPPORTED" if any(v is None for v in rows.values())
+                           else "NOT_COMPARED" if len(rows) < 2
+                           else "REVIEW" if la and score < DIVERGENT_BELOW else "SIMILAR")
                 res["convergence"] = {"verdict": verdict, "worst_pair": [la, lb],
                                       "similarity": round(score, 2)}
                 pair = f" (worst: {la} vs {lb}, {score:.2f})" if la else ""
@@ -277,8 +255,8 @@ def main():
         with open(a.json, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=2, ensure_ascii=False)
 
-    print("\nMachine screen only. Native-speaker check (3 per language, resident in-country)"
-          "\nis still required before money is spent. See assets/native-speaker-check.md.")
+    print("\nSynthetic screen only. REVIEW and radio FAIL are prompts for human testing, not automatic vetoes."
+          "\nA machine PASS is not human validation. See assets/native-speaker-check.md.")
     if unresolved:
         print(f"{unresolved} check(s) UNSUPPORTED -- this screen is not complete.", file=sys.stderr)
         return 1
